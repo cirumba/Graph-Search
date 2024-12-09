@@ -1,4 +1,6 @@
 from typing import Iterable, Set, Tuple
+import heapq
+from collections import deque
 
 class Nodo:
     def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
@@ -17,6 +19,7 @@ class Nodo:
 
 
 def sucessor(estado:str)->Set[Tuple[str,str]]:
+
     def trocar(s, i, j):
         lst = list(s)
         lst[i], lst[j] = lst[j], lst[i]
@@ -82,8 +85,37 @@ def astar_hamming(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    def hamming_distance(estado: str) -> int:
+        objetivo = "12345678_"
+        return sum(1 for i, c in enumerate(estado) if c != objetivo[i] and c != '_')
+
+    def reconstruct_path(nodo: Nodo) -> list[str]:
+        path = []
+        while nodo.pai is not None:
+            path.append(nodo.acao)
+            nodo = nodo.pai
+        return path[::-1]
+
+    def astar_hamming(estado: str) -> list[str]:
+        objetivo = "12345678_"
+        nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+        fronteira = [(hamming_distance(estado), nodo_inicial)]
+        explorados = set()
+
+        while fronteira:
+            _, nodo_atual = heapq.heappop(fronteira)
+
+            if nodo_atual.estado == objetivo:
+                return reconstruct_path(nodo_atual)
+
+            explorados.add(nodo_atual.estado)
+
+            for nodo_sucessor in expande(nodo_atual):
+                if nodo_sucessor.estado not in explorados:
+                    custo_estimado = nodo_sucessor.custo + hamming_distance(nodo_sucessor.estado)
+                    heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
+
+        return None
 
 
 def astar_manhattan(estado:str)->list[str]:
@@ -95,8 +127,41 @@ def astar_manhattan(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    def manhattan_distance(estado: str) -> int:
+        objetivo = "12345678_"
+        distancia = 0
+        for i, c in enumerate(estado):
+            if c != '_' and c != objetivo[i]:
+                objetivo_index = objetivo.index(c)
+                distancia += abs(i // 3 - objetivo_index // 3) + abs(i % 3 - objetivo_index % 3)
+        return distancia
+
+    def reconstruct_path(nodo: Nodo) -> list[str]:
+        path = []
+        while nodo.pai is not None:
+            path.append(nodo.acao)
+            nodo = nodo.pai
+        return path[::-1]
+
+    objetivo = "12345678_"
+    nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+    fronteira = [(manhattan_distance(estado), nodo_inicial)]
+    explorados = set()
+
+    while fronteira:
+        _, nodo_atual = heapq.heappop(fronteira)
+
+        if nodo_atual.estado == objetivo:
+            return reconstruct_path(nodo_atual)
+
+        explorados.add(nodo_atual.estado)
+
+        for nodo_sucessor in expande(nodo_atual):
+            if nodo_sucessor.estado not in explorados:
+                custo_estimado = nodo_sucessor.custo + manhattan_distance(nodo_sucessor.estado)
+                heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
+
+    return None
 
 #opcional,extra
 def bfs(estado:str)->list[str]:
@@ -108,8 +173,31 @@ def bfs(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    def reconstruct_path(nodo: Nodo) -> list[str]:
+        path = []
+        while nodo.pai is not None:
+            path.append(nodo.acao)
+            nodo = nodo.pai
+        return path[::-1]
+
+    objetivo = "12345678_"
+    nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+    fronteira = deque([nodo_inicial])
+    explorados = set()
+
+    while fronteira:
+        nodo_atual = fronteira.popleft()
+
+        if nodo_atual.estado == objetivo:
+            return reconstruct_path(nodo_atual)
+
+        explorados.add(nodo_atual.estado)
+
+        for nodo_sucessor in expande(nodo_atual):
+            if nodo_sucessor.estado not in explorados and nodo_sucessor not in fronteira:
+                fronteira.append(nodo_sucessor)
+
+    return None
 
 #opcional,extra
 def dfs(estado:str)->list[str]:
@@ -121,8 +209,31 @@ def dfs(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    def reconstruct_path(nodo: Nodo) -> list[str]:
+        path = []
+        while nodo.pai is not None:
+            path.append(nodo.acao)
+            nodo = nodo.pai
+        return path[::-1]
+
+    objetivo = "12345678_"
+    nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+    fronteira = [nodo_inicial]
+    explorados = set()
+
+    while fronteira:
+        nodo_atual = fronteira.pop()
+
+        if nodo_atual.estado == objetivo:
+            return reconstruct_path(nodo_atual)
+
+        explorados.add(nodo_atual.estado)
+
+        for nodo_sucessor in expande(nodo_atual):
+            if nodo_sucessor.estado not in explorados and nodo_sucessor not in fronteira:
+                fronteira.append(nodo_sucessor)
+
+    return None
 
 #opcional,extra
 def astar_new_heuristic(estado:str)->list[str]:
@@ -134,5 +245,39 @@ def astar_new_heuristic(estado:str)->list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    def new_heuristic(estado: str) -> int:
+        # Implement your new heuristic here
+        objetivo = "12345678_"
+        distancia = 0
+        for i, c in enumerate(estado):
+            if c != '_' and c != objetivo[i]:
+                objetivo_index = objetivo.index(c)
+                distancia += abs(i // 3 - objetivo_index // 3) + abs(i % 3 - objetivo_index % 3)
+        return distancia
+
+    def reconstruct_path(nodo: Nodo) -> list[str]:
+        path = []
+        while nodo.pai is not None:
+            path.append(nodo.acao)
+            nodo = nodo.pai
+        return path[::-1]
+
+    objetivo = "12345678_"
+    nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+    fronteira = [(new_heuristic(estado), nodo_inicial)]
+    explorados = set()
+
+    while fronteira:
+        _, nodo_atual = heapq.heappop(fronteira)
+
+        if nodo_atual.estado == objetivo:
+            return reconstruct_path(nodo_atual)
+
+        explorados.add(nodo_atual.estado)
+
+        for nodo_sucessor in expande(nodo_atual):
+            if nodo_sucessor.estado not in explorados:
+                custo_estimado = nodo_sucessor.custo + new_heuristic(nodo_sucessor.estado)
+                heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
+
+    return None
