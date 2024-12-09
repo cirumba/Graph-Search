@@ -1,23 +1,22 @@
 from typing import Iterable, Set, Tuple
 
 class Nodo:
-    """
-    Implemente a classe Nodo com os atributos descritos na funcao init
-    """
     def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
-        """
-        Inicializa o nodo com os atributos recebidos
-        :param estado:str, representacao do estado do 8-puzzle
-        :param pai:Nodo, referencia ao nodo pai, (None no caso do nó raiz)
-        :param acao:str, acao a partir do pai que leva a este nodo (None no caso do nó raiz)
-        :param custo:int, custo do caminho da raiz até este nó
-        """
-        # substitua a linha abaixo pelo seu codigo
-        raise NotImplementedError
+        self.estado = estado
+        self.pai = pai
+        self.acao = acao
+        self.custo = custo
+
+    def __eq__(self, other):
+        if isinstance(other, Nodo):
+            return self.estado == other.estado
+        return False
+
+    def __hash__(self):
+        return hash(self.estado)
 
 
 def sucessor(estado:str)->Set[Tuple[str,str]]:
-
     def trocar(s, i, j):
         lst = list(s)
         lst[i], lst[j] = lst[j], lst[i]
@@ -47,14 +46,31 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
 
 
 def expande(nodo:Nodo)->Set[Nodo]:
-    """
-    Recebe um nodo (objeto da classe Nodo) e retorna um conjunto de nodos.
-    Cada nodo do conjunto é contém um estado sucessor do nó recebido.
-    :param nodo: objeto da classe Nodo
-    :return:
-    """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+     sucessores = sucessor(nodo.estado)
+    
+    # Cria os novos nodos com base nos sucessores
+    novos_nodos = set()
+    for acao, estado_sucessor in sucessores:
+        novo_nodo = Nodo(
+            estado=estado_sucessor,
+            pai=nodo,         # Referência ao nodo atual como pai
+            acao=acao,        # A ação que levou ao novo estado
+            custo=nodo.custo + 1  # Incrementa o custo do caminho
+        )
+        novos_nodos.add(novo_nodo)
+    
+    return novos_nodos
+
+# Exemplo de uso
+estado_inicial = "2_3541687"
+nodo_raiz = Nodo(estado=estado_inicial, pai=None, acao=None, custo=0)
+
+# Expande o nodo raiz
+nodos_sucessores = expande(nodo_raiz)
+
+# Imprime os sucessores
+for nodo in nodos_sucessores:
+    print(nodo)
 
 
 def astar_hamming(estado:str)->list[str]:
