@@ -17,15 +17,33 @@ class Nodo:
 
 
 def sucessor(estado:str)->Set[Tuple[str,str]]:
-    """
-    Recebe um estado (string) e retorna um conjunto de tuplas (ação,estado atingido)
-    para cada ação possível no estado recebido.
-    Tanto a ação quanto o estado atingido são strings também.
-    :param estado:
-    :return:
-    """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+
+    def trocar(s, i, j):
+        lst = list(s)
+        lst[i], lst[j] = lst[j], lst[i]
+        return ''.join(lst)
+
+    movimentos = {
+        'cima': -3,
+        'baixo': 3,
+        'esquerda': -1,
+        'direita': 1
+    }
+    
+    pos_vazia = estado.index('0')
+    acoes_possiveis = set()
+
+    for acao, deslocamento in movimentos.items():
+        nova_pos = pos_vazia + deslocamento
+        if 0 <= nova_pos < 9:
+            if acao == 'esquerda' and pos_vazia % 3 == 0:
+                continue
+            if acao == 'direita' and pos_vazia % 3 == 2:
+                continue
+            novo_estado = trocar(estado, pos_vazia, nova_pos)
+            acoes_possiveis.add((acao, novo_estado))
+
+    return acoes_possiveis
 
 
 def expande(nodo:Nodo)->Set[Nodo]:
