@@ -1,5 +1,6 @@
 from typing import Iterable, Set, Tuple
 import heapq
+import time 
 from collections import deque
 
 class Nodo:
@@ -71,111 +72,83 @@ def expande(nodo:Nodo)->Set[Nodo]:
     
     return novos_nodos
 
-estado_inicial = "2_3541687"
-nodo_raiz = Nodo(estado=estado_inicial, pai=None, acao=None, custo=0)
 
-nodos_sucessores = expande(nodo_raiz)
+def hamming_distance(estado: str) -> int:
+    objetivo = "12345678_"
+    return sum(1 for i, c in enumerate(estado) if c != objetivo[i] and c != '_')
 
-for nodo in nodos_sucessores:
-    print(nodo)
+def manhattan_distance(estado: str) -> int:
+    objetivo = "12345678_"
+    distancia = 0
+    for i, c in enumerate(estado):
+        if c != '_' and c != objetivo[i]:
+            objetivo_index = objetivo.index(c)
+            distancia += abs(i // 3 - objetivo_index // 3) + abs(i % 3 - objetivo_index % 3)
+    return distancia
 
+def reconstruct_path(nodo: Nodo) -> list[str]:
+    path = []
+    while nodo.pai is not None:
+        path.append(nodo.acao)
+        nodo = nodo.pai
+    return path[::-1]
 
 def astar_hamming(estado:str)->list[str]:
-    def hamming_distance(estado: str) -> int:
-        objetivo = "12345678_"
-        return sum(1 for i, c in enumerate(estado) if c != objetivo[i] and c != '_')
-
-    def reconstruct_path(nodo: Nodo) -> list[str]:
-        path = []
-        while nodo.pai is not None:
-            path.append(nodo.acao)
-            nodo = nodo.pai
-        return path[::-1]
-
-    
     objetivo = "12345678_"
     nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
     fronteira = [(hamming_distance(estado), nodo_inicial)]
     explorados = set()
+    #nos_expandidos = 0
+
+    #start_time = time.time()
 
     while fronteira:
         _, nodo_atual = heapq.heappop(fronteira)
 
         if nodo_atual.estado == objetivo:
-            return reconstruct_path(nodo_atual)
+            #end_time = time.time()
+            return reconstruct_path(nodo_atual)#, nos_expandidos, end_time - start_time
 
         explorados.add(nodo_atual.estado)
+        #nos_expandidos += 1
 
         for nodo_sucessor in expande(nodo_atual):
             if nodo_sucessor.estado not in explorados:
                 custo_estimado = nodo_sucessor.custo + hamming_distance(nodo_sucessor.estado)
                 heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
 
-    return None
+    return None#, nos_expandidos, time.time() - start_time
+
 
 
 def astar_manhattan(estado:str)->list[str]:
-    """
-    Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Manhattan e
-    retorna uma lista de ações que leva do
-    estado recebido até o objetivo ("12345678_").
-    Caso não haja solução a partir do estado recebido, retorna None
-    :param estado: str
-    :return:
-    """
-    def manhattan_distance(estado: str) -> int:
-        objetivo = "12345678_"
-        distancia = 0
-        for i, c in enumerate(estado):
-            if c != '_' and c != objetivo[i]:
-                objetivo_index = objetivo.index(c)
-                distancia += abs(i // 3 - objetivo_index // 3) + abs(i % 3 - objetivo_index % 3)
-        return distancia
-
-    def reconstruct_path(nodo: Nodo) -> list[str]:
-        path = []
-        while nodo.pai is not None:
-            path.append(nodo.acao)
-            nodo = nodo.pai
-        return path[::-1]
-
     objetivo = "12345678_"
     nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
     fronteira = [(manhattan_distance(estado), nodo_inicial)]
     explorados = set()
+    #nos_expandidos = 0
+
+    #start_time = time.time()
 
     while fronteira:
         _, nodo_atual = heapq.heappop(fronteira)
 
         if nodo_atual.estado == objetivo:
-            return reconstruct_path(nodo_atual)
+            #end_time = time.time()
+            return reconstruct_path(nodo_atual)#, nos_expandidos, end_time - start_time
 
         explorados.add(nodo_atual.estado)
+        #nos_expandidos += 1
 
         for nodo_sucessor in expande(nodo_atual):
             if nodo_sucessor.estado not in explorados:
                 custo_estimado = nodo_sucessor.custo + manhattan_distance(nodo_sucessor.estado)
                 heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
 
-    return None
+    return None#, nos_expandidos, time.time() - start_time
+ 
 
-#opcional,extra
 def bfs(estado:str)->list[str]:
-    """
-    Recebe um estado (string), executa a busca em LARGURA e
-    retorna uma lista de ações que leva do
-    estado recebido até o objetivo ("12345678_").
-    Caso não haja solução a partir do estado recebido, retorna None
-    :param estado: str
-    :return:
-    """
-    def reconstruct_path(nodo: Nodo) -> list[str]:
-        path = []
-        while nodo.pai is not None:
-            path.append(nodo.acao)
-            nodo = nodo.pai
-        return path[::-1]
-
     objetivo = "12345678_"
     nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
     fronteira = deque([nodo_inicial])
@@ -197,21 +170,6 @@ def bfs(estado:str)->list[str]:
 
 #opcional,extra
 def dfs(estado:str)->list[str]:
-    """
-    Recebe um estado (string), executa a busca em PROFUNDIDADE e
-    retorna uma lista de ações que leva do
-    estado recebido até o objetivo ("12345678_").
-    Caso não haja solução a partir do estado recebido, retorna None
-    :param estado: str
-    :return:
-    """
-    def reconstruct_path(nodo: Nodo) -> list[str]:
-        path = []
-        while nodo.pai is not None:
-            path.append(nodo.acao)
-            nodo = nodo.pai
-        return path[::-1]
-
     objetivo = "12345678_"
     nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
     fronteira = [nodo_inicial]
@@ -233,16 +191,7 @@ def dfs(estado:str)->list[str]:
 
 #opcional,extra
 def astar_new_heuristic(estado:str)->list[str]:
-    """
-    Recebe um estado (string), executa a busca A* com h(n) = sua nova heurística e
-    retorna uma lista de ações que leva do
-    estado recebido até o objetivo ("12345678_").
-    Caso não haja solução a partir do estado recebido, retorna None
-    :param estado: str
-    :return:
-    """
     def new_heuristic(estado: str) -> int:
-        # Implement your new heuristic here
         objetivo = "12345678_"
         distancia = 0
         for i, c in enumerate(estado):
@@ -250,13 +199,6 @@ def astar_new_heuristic(estado:str)->list[str]:
                 objetivo_index = objetivo.index(c)
                 distancia += abs(i // 3 - objetivo_index // 3) + abs(i % 3 - objetivo_index % 3)
         return distancia
-
-    def reconstruct_path(nodo: Nodo) -> list[str]:
-        path = []
-        while nodo.pai is not None:
-            path.append(nodo.acao)
-            nodo = nodo.pai
-        return path[::-1]
 
     objetivo = "12345678_"
     nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
@@ -277,3 +219,23 @@ def astar_new_heuristic(estado:str)->list[str]:
                 heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
 
     return None
+
+'''estado_inicial = "2_3541687"
+
+# A* com distância de Hamming
+solucao_hamming, nos_expandidos_hamming, tempo_hamming = astar_hamming(estado_inicial)
+custo_hamming = len(solucao_hamming) if solucao_hamming else None
+
+print(f"A* com distância de Hamming:")
+print(f"Nós expandidos: {nos_expandidos_hamming}")
+print(f"Tempo decorrido: {tempo_hamming:.2f} segundos")
+print(f"Custo da solução: {custo_hamming}")
+
+# A* com distância de Manhattan
+solucao_manhattan, nos_expandidos_manhattan, tempo_manhattan = astar_manhattan(estado_inicial)
+custo_manhattan = len(solucao_manhattan) if solucao_manhattan else None
+
+print(f"A* com distância de Manhattan:")
+print(f"Nós expandidos: {nos_expandidos_manhattan}")
+print(f"Tempo decorrido: {tempo_manhattan:.2f} segundos")
+print(f"Custo da solução: {custo_manhattan}")'''
