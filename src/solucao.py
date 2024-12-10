@@ -8,6 +8,7 @@ class Nodo:
         self.pai = pai
         self.acao = acao
         self.custo = custo
+        self.sucessores = []
 
     def __eq__(self, other):
         if isinstance(other, Nodo):
@@ -16,6 +17,12 @@ class Nodo:
 
     def __hash__(self):
         return hash(self.estado)
+    
+    def __lt__(self, other):
+        return self.custo < other.custo
+    
+    def adiciona_sucessor(self, nodo_sucessor:'Nodo'):
+        self.sucessores.append(nodo_sucessor)
 
 
 def sucessor(estado:str)->Set[Tuple[str,str]]:
@@ -26,13 +33,13 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
         return ''.join(lst)
 
     movimentos = {
-        'cima': -3,
-        'baixo': 3,
+        'acima': -3,
+        'abaixo': 3,
         'esquerda': -1,
         'direita': 1
     }
     
-    pos_vazia = estado.index('0')
+    pos_vazia = estado.index('_')
     acoes_possiveis = set()
 
     for acao, deslocamento in movimentos.items():
@@ -50,9 +57,8 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
 
 def expande(nodo:Nodo)->Set[Nodo]:
     sucessores = sucessor(nodo.estado)
-    
-    
     novos_nodos = set()
+
     for acao, estado_sucessor in sucessores:
         novo_nodo = Nodo(
             estado=estado_sucessor,
@@ -61,6 +67,7 @@ def expande(nodo:Nodo)->Set[Nodo]:
             custo=nodo.custo + 1  
         )
         novos_nodos.add(novo_nodo)
+        nodo.adiciona_sucessor(novo_nodo)
     
     return novos_nodos
 
@@ -74,14 +81,6 @@ for nodo in nodos_sucessores:
 
 
 def astar_hamming(estado:str)->list[str]:
-    """
-    Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Hamming e
-    retorna uma lista de ações que leva do
-    estado recebido até o objetivo ("12345678_").
-    Caso não haja solução a partir do estado recebido, retorna None
-    :param estado: str
-    :return:
-    """
     def hamming_distance(estado: str) -> int:
         objetivo = "12345678_"
         return sum(1 for i, c in enumerate(estado) if c != objetivo[i] and c != '_')
@@ -93,26 +92,26 @@ def astar_hamming(estado:str)->list[str]:
             nodo = nodo.pai
         return path[::-1]
 
-    def astar_hamming(estado: str) -> list[str]:
-        objetivo = "12345678_"
-        nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
-        fronteira = [(hamming_distance(estado), nodo_inicial)]
-        explorados = set()
+    
+    objetivo = "12345678_"
+    nodo_inicial = Nodo(estado=estado, pai=None, acao=None, custo=0)
+    fronteira = [(hamming_distance(estado), nodo_inicial)]
+    explorados = set()
 
-        while fronteira:
-            _, nodo_atual = heapq.heappop(fronteira)
+    while fronteira:
+        _, nodo_atual = heapq.heappop(fronteira)
 
-            if nodo_atual.estado == objetivo:
-                return reconstruct_path(nodo_atual)
+        if nodo_atual.estado == objetivo:
+            return reconstruct_path(nodo_atual)
 
-            explorados.add(nodo_atual.estado)
+        explorados.add(nodo_atual.estado)
 
-            for nodo_sucessor in expande(nodo_atual):
-                if nodo_sucessor.estado not in explorados:
-                    custo_estimado = nodo_sucessor.custo + hamming_distance(nodo_sucessor.estado)
-                    heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
+        for nodo_sucessor in expande(nodo_atual):
+            if nodo_sucessor.estado not in explorados:
+                custo_estimado = nodo_sucessor.custo + hamming_distance(nodo_sucessor.estado)
+                heapq.heappush(fronteira, (custo_estimado, nodo_sucessor))
 
-        return None
+    return None
 
 
 def astar_manhattan(estado:str)->list[str]:
