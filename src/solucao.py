@@ -3,7 +3,7 @@ import heapq
 from collections import deque
 
 class Nodo:
-    def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
+    def __init__(self, estado:str, pai:'Nodo', acao:str, custo:int):
         self.estado = estado
         self.pai = pai
         self.acao = acao
@@ -49,29 +49,26 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
 
 
 def expande(nodo:Nodo)->Set[Nodo]:
-     sucessores = sucessor(nodo.estado)
+    sucessores = sucessor(nodo.estado)
     
-    # Cria os novos nodos com base nos sucessores
+    
     novos_nodos = set()
     for acao, estado_sucessor in sucessores:
         novo_nodo = Nodo(
             estado=estado_sucessor,
-            pai=nodo,         # Referência ao nodo atual como pai
-            acao=acao,        # A ação que levou ao novo estado
-            custo=nodo.custo + 1  # Incrementa o custo do caminho
+            pai=nodo,         
+            acao=acao,        
+            custo=nodo.custo + 1  
         )
         novos_nodos.add(novo_nodo)
     
     return novos_nodos
 
-# Exemplo de uso
 estado_inicial = "2_3541687"
 nodo_raiz = Nodo(estado=estado_inicial, pai=None, acao=None, custo=0)
 
-# Expande o nodo raiz
 nodos_sucessores = expande(nodo_raiz)
 
-# Imprime os sucessores
 for nodo in nodos_sucessores:
     print(nodo)
 
